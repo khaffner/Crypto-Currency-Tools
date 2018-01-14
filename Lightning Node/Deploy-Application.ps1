@@ -30,7 +30,7 @@ Try {
 	[string]$appRevision = ''
 	[string]$appScriptVersion = ''
 	[string]$appScriptDate = ''
-	[string]$appScriptAuthor = 'Kevin Haffner'
+	[string]$appScriptAuthor = 'Kevin Haffner' #https://medium.com/@jadmubaslat/bitcoin-lightning-network-node-easy-setup-tutorial-for-windows-desktop-users-a-how-to-guide-9937b5a8a669
 	##*===============================================
 	## Variables: Install Titles (Only set here to override defaults set by the toolkit)
 	[string]$installName = ''
@@ -109,7 +109,6 @@ Try {
         $YarnInstallerPath = "$env:TEMP\YarnInstaller.msi"
         Invoke-WebRequest -Uri $YarnInstallerUri -OutFile $YarnInstallerPath
 
-
         $VisualCPlusPlus2015BuildToolsInstallerUri = "http://go.microsoft.com/fwlink/?LinkId=691126&fixForIE=.exe"
         $VisualCPlusPlus2015BuildToolsInstallerPath = "$env:TEMP\VisualCPlusPlus2015BuildToolsInstaller.exe"
         Invoke-WebRequest -Uri $VisualCPlusPlus2015BuildToolsUri -OutFile $VisualCPlusPlus2015BuildToolsPath
@@ -119,12 +118,25 @@ Try {
             Execute-Process             -Path $GitInstallerPath -Parameters '/SILENT /NORESTART'
             Execute-MSI -Action Install -Path $YarnInstallerPath
             Execute-Process             -Path $VisualCPlusPlus2015BuildToolsInstallerUri -Parameters '/Passive /Norestart'
-            #Show-InstallationRestartPrompt
+            Show-InstallationRestartPrompt
         }
 
+        #After reboot
+        Execute-Process -Path npm.exe -Parameters "--add-python-to-path='true' --debug install --global windows-build-tools"
 
+        $LightningPath = "$env:USERPROFILE\Desktop\Lightning-App"
+        if(!(Test-Path $LightningPath)) {New-Item -Path $LightningPath -ItemType Directory}
+        Set-LocalGroup $LightningPath
 
-		
+        Execute-Process -Path "git.exe" -Parameters "clone https://github.com/lightninglabs/lightning-app.git"
+        
+        Set-Location "$LightningPath\lightning-app"
+        
+        Execute-Process -Path "npm.exe" -Parameters "run setup"
+        Execute-Process -Path "npm.exe" -Parameters "run package-electron"	
+
+        New-Shortcut -Path "$env:USERPROFILE\Desktop\Lightning.lnk" -TargetPath "$LightningPath\lightning-app\release\Lightning-win32-x64\Lightning.exe"-WorkingDirectory "$LightningPath\lightning-app\release\Lightning-win32-x64"
+
 		##*===============================================
 		##* POST-INSTALLATION
 		##*===============================================
