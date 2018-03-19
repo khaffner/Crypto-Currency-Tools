@@ -11,13 +11,13 @@
 
     Process {
         # Getting the SHA256 hash of the latest version according to changelog
-        $ValidHash = (Invoke-WebRequest -Uri $Changelog | select -ExpandProperty Content | Select-String -Pattern '[0-9A-z]{64,}').Matches.Value
+        $ValidHash = (Invoke-WebRequest -Uri $Changelog | Select-Object -ExpandProperty Content | Select-String -Pattern '[0-9A-z]{64,}').Matches.Value
         
         # Downloading the latest/current version
         Invoke-WebRequest -Uri $htmlpage -OutFile $Path
 
         #Getting the hash of the latest/current version
-        $htmlhash = Get-FileHash $Path | select -ExpandProperty Hash
+        $htmlhash = Get-FileHash $Path | Select-Object -ExpandProperty Hash
     }
     End {
         if($htmlhash -eq $ValidHash) {

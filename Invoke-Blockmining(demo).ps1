@@ -7,7 +7,7 @@ while($true) {
         'Nonce'        = $n
     }
     $Block | Out-File "$env:TEMP\block.txt" -Force
-    $BlockHash = Get-FileHash "$env:TEMP\block.txt" -Algorithm SHA256 | select -ExpandProperty Hash
+    $BlockHash = Get-FileHash "$env:TEMP\block.txt" -Algorithm SHA256 | Select-Object -ExpandProperty Hash
     $Difficulty = $Block.Difficulty
     if($BlockHash -like "$Difficulty*") {
         return $BlockHash

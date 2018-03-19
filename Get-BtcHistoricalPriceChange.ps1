@@ -22,7 +22,7 @@
         Foreach ($Day in $DaysBack) {
             $Report = New-Object -TypeName psobject
             $Date = (Get-Date (Get-Date).AddDays(-$Day) -Format yyyy-MM-dd)
-            $OldValue = ($HistoricalValueData | where time -Like $Date*).average
+            $OldValue = ($HistoricalValueData | Where-Object time -Like $Date*).average
             $PercentChange = (($CurrentValue-$OldValue)/$OldValue)*100
 
             $Report | Add-Member -MemberType NoteProperty -Name "DaysAgo"              -Value $Day
