@@ -14,9 +14,7 @@ Param (
 	[switch]$DisableLogging = $false,
 
 	[Parameter(Mandatory=$True)][String]$RPCUser,
-	[Parameter(Mandatory=$True)][String]$RPCPassword,
-	[Parameter(Mandatory=$false)][String]$NodeAlias,
-	[Parameter(Mandatory=$false)][String]$NodeColour
+	[Parameter(Mandatory=$True)][String]$RPCPassword
 )
 
 Try {
