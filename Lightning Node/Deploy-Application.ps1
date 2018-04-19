@@ -122,7 +122,7 @@ Try {
 		}
 		Out-File $EclairConfigFolder\Eclair.conf -InputObject ((Get-Content $PSScriptRoot\Files\Eclair.conf) -replace "rpcuser,$RPCUser" -replace "RPCPassword,$RPCPassword")
 
-		Execute-ProcessAsUser -Path "$env:ProgramFiles\Bitcoin\bitcoin-qt.exe" -RunLevel LeastPrivilege
+		Execute-ProcessAsUser -Path "$env:ProgramFiles\Bitcoin\bitcoin-qt.exe" -RunLevel LeastPrivilege -NoWait
 
 		##*===============================================
 		##* POST-INSTALLATION
