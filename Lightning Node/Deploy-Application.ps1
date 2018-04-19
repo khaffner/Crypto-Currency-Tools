@@ -130,6 +130,11 @@ Try {
 		[string]$installPhase = 'Post-Installation'
 		
 		## <Perform Post-Installation tasks here>
+		$ExtIP = Invoke-RestMethod "api.ipify.org"
+		$ConnectionResult = Test-NetConnection -ComputerName $ExtIP -Port 9735
+		if(!($ConnectionResult.TcpTestSucceeded)) {
+			Show-InstallationPrompt -Message "Port 9735 on this computer is not accessible from the Internet. You'll need to configure this in your router and/or firewall." -ButtonMiddleText 'OK'
+		}
 		
 		## Display a message at the end of the install
 		If (-not $useDefaultMsi) { Show-InstallationPrompt -Message 'Done!' -ButtonRightText 'OK' -Icon Information -NoWait }
