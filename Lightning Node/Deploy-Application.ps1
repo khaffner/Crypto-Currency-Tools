@@ -11,7 +11,12 @@ Param (
 	[Parameter(Mandatory=$false)]
 	[switch]$TerminalServerMode = $false,
 	[Parameter(Mandatory=$false)]
-	[switch]$DisableLogging = $false
+	[switch]$DisableLogging = $false,
+
+	[Parameter(Mandatory=$True)][String]$RPCUser,
+	[Parameter(Mandatory=$True)][String]$RPCPassword,
+	[Parameter(Mandatory=$false)][String]$NodeAlias,
+	[Parameter(Mandatory=$false)][String]$NodeColour
 )
 
 Try {
@@ -30,7 +35,7 @@ Try {
 	[string]$appRevision = ''
 	[string]$appScriptVersion = ''
 	[string]$appScriptDate = ''
-	[string]$appScriptAuthor = 'Kevin Haffner' #https://medium.com/@jadmubaslat/bitcoin-lightning-network-node-easy-setup-tutorial-for-windows-desktop-users-a-how-to-guide-9937b5a8a669
+	[string]$appScriptAuthor = 'Kevin Haffner' #Based on https://mainnet.yalls.org/articles/97d67df1-d721-417d-a6c0-11d793739be9:0965AC5E-56CD-4870-9041-E69616660E6F/e276a8ee-01e3-4442-b6c7-340b6b54ce98
 	##*===============================================
 	## Variables: Install Titles (Only set here to override defaults set by the toolkit)
 	[string]$installName = ''
@@ -79,10 +84,9 @@ Try {
 
 		
         ## Show Progress Message (with the default message)
-		Show-InstallationProgress
 		
 		## <Perform Pre-Installation tasks here>
-		
+		Show-InstallationWelcome -CheckDiskSpace -RequiredDiskSpace 200000
 		
 		##*===============================================
 		##* INSTALLATION 
@@ -96,46 +100,31 @@ Try {
 		}
 		
 		## <Perform Installation tasks here>
-		
-        $NodeInstallerUri = ((Invoke-WebRequest -Uri 'https://nodejs.org/en/download/').Links | where href -Like '*x64.msi').href
-        $NodeInstallerPath = "$env:TEMP\NodeInstaller.msi"
-        Invoke-WebRequest -Uri $NodeInstallerUri -OutFile $NodeInstallerPath
-        
-        $GitInstallerUri = ((Invoke-WebRequest -Uri "https://git-scm.com/download/win").Links | where href -Like '*64-bit.exe').href | select -First 1
-        $GitInstallerPath = "$env:TEMP\GitInstaller.exe"
-        Invoke-WebRequest -Uri $GitInstallerUri -OutFile $GitInstallerPath
+		Show-InstallationProgress "Downloading Bitcoin Core 0.16"
+		$BitcoinCoreInstaller = "$env:TEMP\BitcoinCore.exe"
+		Invoke-WebRequest -Uri 'https://bitcoin.org/bin/bitcoin-core-0.16.0/bitcoin-0.16.0-win64-setup.exe' -OutFile $BitcoinCoreInstaller
 
-        $YarnInstallerUri = "https://yarnpkg.com/latest.msi"
-        $YarnInstallerPath = "$env:TEMP\YarnInstaller.msi"
-        Invoke-WebRequest -Uri $YarnInstallerUri -OutFile $YarnInstallerPath
+		Show-InstallationProgress "Downloading Eclair 0.2 Beta 2"
+		$EclairInstaller = "$env:TEMP\Eclair.exe"
+		Invoke-WebRequest -Uri 'https://github.com/ACINQ/eclair/releases/download/v0.2-beta2/Eclair-0.2-beta2.exe' -OutFile $EclairInstaller
 
-        $VisualCPlusPlus2015BuildToolsInstallerUri = "http://go.microsoft.com/fwlink/?LinkId=691126&fixForIE=.exe"
-        $VisualCPlusPlus2015BuildToolsInstallerPath = "$env:TEMP\VisualCPlusPlus2015BuildToolsInstaller.exe"
-        Invoke-WebRequest -Uri $VisualCPlusPlus2015BuildToolsUri -OutFile $VisualCPlusPlus2015BuildToolsPath
+		Show-InstallationProgress "Installing Bitcoin Core 0.16"
+		Execute-Process -Path $BitcoinCoreInstaller -Parameters '/S'
+		$BitcoinConfigFolder = "$env:APPDATA\Bitcoin"
+		if(!(Test-Path $BitcoinConfigFolder)) {
+			New-Item -Path $BitcoinConfigFolder -ItemType Directory -Force
+		}
+		Out-File $BitcoinConfigFolder\Bitcoin.conf -InputObject ((Get-Content $PSScriptRoot\Files\Bitcoin.conf) -replace "rpcuser,$RPCUser" -replace "RPCPassword,$RPCPassword")
 
-        if (Test-Path (Get-Variable -Name *InstallerPath).Value) {
-            Execute-MSI -Action Install -Path $NodeInstallerPath
-            Execute-Process             -Path $GitInstallerPath -Parameters '/SILENT /NORESTART'
-            Execute-MSI -Action Install -Path $YarnInstallerPath
-            Execute-Process             -Path $VisualCPlusPlus2015BuildToolsInstallerUri -Parameters '/Passive /Norestart'
-            Show-InstallationRestartPrompt
-        }
+		Show-InstallationProgress "Installing Eclair 0.2 Beta 2"
+		Execute-Process -Path "Installing Eclair 0.2 Beta 2" -Parameters '/VERYSILENT /NORESTART'
+		$EclairConfigFolder = "$env:USERPROFILE\.eclair"
+		if(!(Test-Path $EclairConfigFolder)) {
+			New-Item -Path $EclairConfigFolder -ItemType Directory -Force
+		}
+		Out-File $EclairConfigFolder\Eclair.conf -InputObject ((Get-Content $PSScriptRoot\Files\Eclair.conf) -replace "rpcuser,$RPCUser" -replace "RPCPassword,$RPCPassword")
 
-        #After reboot
-        Execute-Process -Path npm.exe -Parameters "--add-python-to-path='true' --debug install --global windows-build-tools"
-
-        $LightningPath = "$env:USERPROFILE\Desktop\Lightning-App"
-        if(!(Test-Path $LightningPath)) {New-Item -Path $LightningPath -ItemType Directory}
-        Set-LocalGroup $LightningPath
-
-        Execute-Process -Path "git.exe" -Parameters "clone https://github.com/lightninglabs/lightning-app.git"
-        
-        Set-Location "$LightningPath\lightning-app"
-        
-        Execute-Process -Path "npm.exe" -Parameters "run setup"
-        Execute-Process -Path "npm.exe" -Parameters "run package-electron"	
-
-        New-Shortcut -Path "$env:USERPROFILE\Desktop\Lightning.lnk" -TargetPath "$LightningPath\lightning-app\release\Lightning-win32-x64\Lightning.exe"-WorkingDirectory "$LightningPath\lightning-app\release\Lightning-win32-x64"
+		Execute-ProcessAsUser -Path "$env:ProgramFiles\Bitcoin\bitcoin-qt.exe" -RunLevel LeastPrivilege
 
 		##*===============================================
 		##* POST-INSTALLATION
