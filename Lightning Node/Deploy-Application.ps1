@@ -85,7 +85,8 @@ Try {
 		
 		## <Perform Pre-Installation tasks here>
 		Show-InstallationWelcome -CheckDiskSpace -RequiredDiskSpace 200000
-		
+		[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
 		##*===============================================
 		##* INSTALLATION 
 		##*===============================================
