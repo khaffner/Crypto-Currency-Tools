@@ -13,8 +13,8 @@ Param (
 	[Parameter(Mandatory=$false)]
 	[switch]$DisableLogging = $false,
 
-	[Parameter(Mandatory=$True)][String]$RPCUser,
-	[Parameter(Mandatory=$True)][String]$RPCPassword
+	[Parameter(Mandatory=$True)][String]$RPCUser = 'User',
+	[Parameter(Mandatory=$True)][String]$RPCPassword = (New-Guid).Guid.Replace('-','')
 )
 
 Try {
@@ -122,6 +122,7 @@ Try {
 		}
 		Out-File $EclairConfigFolder\Eclair.conf -InputObject ((Get-Content $PSScriptRoot\Files\Eclair.conf) -replace "rpcuser,$RPCUser" -replace "RPCPassword,$RPCPassword")
 
+		Show-InstallationPrompt -Title 'Bitcoin Core needs to sync' -Message 'Bitcoin Core needs to sync, this might take days... When this is done, you may open Eclair.' -ButtonMiddleText "OK"
 		Execute-ProcessAsUser -Path "$env:ProgramFiles\Bitcoin\bitcoin-qt.exe" -RunLevel LeastPrivilege -NoWait
 
 		##*===============================================
