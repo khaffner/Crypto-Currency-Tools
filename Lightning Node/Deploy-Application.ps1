@@ -124,7 +124,7 @@ Try {
 		Out-File $EclairConfigFolder\eclair.conf -InputObject (Get-Content $PSScriptRoot\Files\eclair.conf).Replace("=rpcuser","=$RPCUser").Replace("=rpcpassword","=$RPCPassword")
 
 		Show-InstallationPrompt -Title 'Bitcoin Core needs to sync' -Message 'Bitcoin Core needs to sync, this might take days... When this is done, you may open Eclair.' -ButtonMiddleText "OK"
-		Execute-ProcessAsUser -Path "$env:ProgramFiles\Bitcoin\bitcoin-qt.exe" -RunLevel LeastPrivilege -NoWait
+		Execute-ProcessAsUser -Path "$env:ProgramFiles\Bitcoin\bitcoin-qt.exe" -RunLevel LeastPrivilege
 
 		##*===============================================
 		##* POST-INSTALLATION
