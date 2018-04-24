@@ -13,8 +13,8 @@ Param (
 	[Parameter(Mandatory=$false)]
 	[switch]$DisableLogging = $false,
 
-	[Parameter(Mandatory=$True)][String]$RPCUser = 'User',
-	[Parameter(Mandatory=$True)][String]$RPCPassword = (New-Guid).Guid.Replace('-','')
+	[Parameter(Mandatory=$false)][String]$RPCUser = 'User',
+	[Parameter(Mandatory=$false)][String]$RPCPassword = (New-Guid).Guid.Replace('-','')
 )
 
 Try {
