@@ -116,7 +116,7 @@ Try {
 		Out-File $BitcoinConfigFolder\Bitcoin.conf -InputObject ((Get-Content $PSScriptRoot\Files\Bitcoin.conf) -replace "rpcuser,$RPCUser" -replace "RPCPassword,$RPCPassword")
 
 		Show-InstallationProgress "Installing Eclair 0.2 Beta 2"
-		Execute-Process -Path "Installing Eclair 0.2 Beta 2" -Parameters '/VERYSILENT /NORESTART'
+		Execute-Process -Path $EclairInstaller -Parameters '/VERYSILENT /NORESTART'
 		$EclairConfigFolder = "$env:USERPROFILE\.eclair"
 		if(!(Test-Path $EclairConfigFolder)) {
 			New-Item -Path $EclairConfigFolder -ItemType Directory -Force
