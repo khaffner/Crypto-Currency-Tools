@@ -113,7 +113,7 @@ Try {
 		if(!(Test-Path $BitcoinConfigFolder)) {
 			New-Item -Path $BitcoinConfigFolder -ItemType Directory -Force
 		}
-		Out-File $BitcoinConfigFolder\bitcoin.conf -InputObject (Get-Content $PSScriptRoot\Files\bitcoin.conf).Replace("=rpcuser","=$RPCUser").Replace("=rpcpassword","=$RPCPassword")
+		Out-File $BitcoinConfigFolder\bitcoin.conf -InputObject ((Get-Content $PSScriptRoot\Files\bitcoin.conf).Replace("=rpcuser","=$RPCUser").Replace("=rpcpassword","=$RPCPassword")).TrimEnd()
 
 		Show-InstallationProgress "Installing Eclair 0.2 Beta 2"
 		Execute-Process -Path $EclairInstaller -Parameters '/VERYSILENT /NORESTART'
@@ -121,7 +121,7 @@ Try {
 		if(!(Test-Path $EclairConfigFolder)) {
 			New-Item -Path $EclairConfigFolder -ItemType Directory -Force
 		}
-		Out-File $EclairConfigFolder\eclair.conf -InputObject (Get-Content $PSScriptRoot\Files\eclair.conf).Replace("=rpcuser","=$RPCUser").Replace("=rpcpassword","=$RPCPassword")
+		Out-File $EclairConfigFolder\eclair.conf -InputObject ((Get-Content $PSScriptRoot\Files\eclair.conf).Replace("=rpcuser","=$RPCUser").Replace("=rpcpassword","=$RPCPassword")).TrimEnd()
 
 		Show-InstallationPrompt -Title 'Bitcoin Core needs to sync' -Message 'Bitcoin Core needs to sync, this might take days... When this is done, you may open Eclair.' -ButtonMiddleText "OK"
 		Execute-ProcessAsUser -Path "$env:ProgramFiles\Bitcoin\bitcoin-qt.exe" -RunLevel LeastPrivilege
