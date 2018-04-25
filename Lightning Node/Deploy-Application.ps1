@@ -112,6 +112,8 @@ Try {
 				Add-Content -Path $BitcoinConfigFolder\bitcoin.conf -Value (([System.Environment]::NewLine)+$Line) -NoNewline
 			}
 		}
+		New-NetFirewallRule -DisplayName "Bitcoin Core" -Description "Bitcoin Core" -Enabled True -Profile Any -Direction Inbound -Protocol TCP -Program 'C:\Program Files\Bitcoin\bitcoin-qt.exe'
+		New-NetFirewallRule -DisplayName "Bitcoin Core" -Description "Bitcoin Core" -Enabled True -Profile Any -Direction Inbound -Protocol UDP -Program 'C:\Program Files\Bitcoin\bitcoin-qt.exe'
 
 		
 		Show-InstallationProgress "Installing Eclair 0.2 Beta 2"
@@ -129,6 +131,9 @@ Try {
 				Add-Content -Path $EclairConfigFolder\eclair.conf -Value (([System.Environment]::NewLine)+$Line) -NoNewline
 			}
 		}
+		New-NetFirewallRule -DisplayName "Eclair" -Description "Eclair" -Enabled True -Profile Any -Direction Inbound -Protocol TCP -Program "$env:USERPROFILE\Eclair\Eclair.exe"
+		New-NetFirewallRule -DisplayName "Eclair" -Description "Eclair" -Enabled True -Profile Any -Direction Inbound -Protocol UDP -Program "$env:USERPROFILE\Eclair\Eclair.exe"
+
 		Show-InstallationPrompt -Title 'Bitcoin Core needs to sync' -Message 'Bitcoin Core needs to sync, this might take days... When this is done, you may open Eclair. In the meantime, forward port 9735 in your router to this computer.' -ButtonMiddleText "OK"
 		Execute-ProcessAsUser -Path "$env:ProgramFiles\Bitcoin\bitcoin-qt.exe" -RunLevel LeastPrivilege
 
