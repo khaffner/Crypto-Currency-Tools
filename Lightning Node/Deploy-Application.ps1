@@ -80,10 +80,6 @@ Try {
 		##*===============================================
 		[string]$installPhase = 'Pre-Installation'
 
-		
-        ## Show Progress Message (with the default message)
-		
-		## <Perform Pre-Installation tasks here>
 		Show-InstallationWelcome -CheckDiskSpace -RequiredDiskSpace 200000
 		[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
@@ -91,14 +87,7 @@ Try {
 		##* INSTALLATION 
 		##*===============================================
 		[string]$installPhase = 'Installation'
-		
-		## Handle Zero-Config MSI Installations
-		If ($useDefaultMsi) {
-			[hashtable]$ExecuteDefaultMSISplat =  @{ Action = 'Install'; Path = $defaultMsiFile }; If ($defaultMstFile) { $ExecuteDefaultMSISplat.Add('Transform', $defaultMstFile) }
-			Execute-MSI @ExecuteDefaultMSISplat; If ($defaultMspFiles) { $defaultMspFiles | ForEach-Object { Execute-MSI -Action 'Patch' -Path $_ } }
-		}
-		
-		## <Perform Installation tasks here>
+				
 		Show-InstallationProgress "Downloading Bitcoin Core 0.16"
 		$BitcoinCoreInstaller = "$env:TEMP\BitcoinCore.exe"
 		Invoke-WebRequest -Uri 'https://bitcoin.org/bin/bitcoin-core-0.16.0/bitcoin-0.16.0-win64-setup.exe' -OutFile $BitcoinCoreInstaller
@@ -147,11 +136,9 @@ Try {
 		##* POST-INSTALLATION
 		##*===============================================
 		[string]$installPhase = 'Post-Installation'
-		
-		## <Perform Post-Installation tasks here>
-		
+				
 		## Display a message at the end of the install
-		If (-not $useDefaultMsi) { Show-InstallationPrompt -Message 'Done!' -ButtonRightText 'OK' -Icon Information -NoWait }
+		Show-InstallationPrompt -Message 'Done!' -ButtonRightText 'OK' -Icon Information -NoWait
 	}
 	ElseIf ($deploymentType -ieq 'Uninstall')
 	{
@@ -160,26 +147,12 @@ Try {
 		##*===============================================
 		[string]$installPhase = 'Pre-Uninstallation'
 		
-		## Show Welcome Message, close Internet Explorer with a 60 second countdown before automatically closing
-		
-		## Show Progress Message (with the default message)
-		
-		## <Perform Pre-Uninstallation tasks here>
-		
 		
 		##*===============================================
 		##* UNINSTALLATION
 		##*===============================================
 		[string]$installPhase = 'Uninstallation'
-		
-		## Handle Zero-Config MSI Uninstallations
-		If ($useDefaultMsi) {
-			[hashtable]$ExecuteDefaultMSISplat =  @{ Action = 'Uninstall'; Path = $defaultMsiFile }; If ($defaultMstFile) { $ExecuteDefaultMSISplat.Add('Transform', $defaultMstFile) }
-			Execute-MSI @ExecuteDefaultMSISplat
-		}
-		
-		# <Perform Uninstallation tasks here>
-		
+				
 		
 		##*===============================================
 		##* POST-UNINSTALLATION
