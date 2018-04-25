@@ -98,13 +98,16 @@ Try {
 
 		
 		Show-InstallationProgress "Installing Bitcoin Core 0.16"
+		#Installing silently
 		Execute-Process -Path $BitcoinCoreInstaller -Parameters '/S'
 		$BitcoinConfigFolder = "$env:APPDATA\Bitcoin"
 		if(!(Test-Path $BitcoinConfigFolder)) {
+			#Creating the folder if it does not exist
 			New-Item -Path $BitcoinConfigFolder -ItemType Directory -Force
 		}
 		$BitcoinConfig = @("testnet=0","server=1","rpcuser=$RPCUser","rpcpassword=$RPCPassword","txindex=1","zmqpubrawblock=tcp://127.0.0.1:29000","zmqpubrawtx=tcp://127.0.0.1:29000","addresstype=p2sh-segwit")
 		foreach ($Line in $BitcoinConfig) {
+			#Looping through the config properties and writing to config file, using ::Newline and -NoNewline because powershell weirdness. 
 			if($Line -eq $BitcoinConfig[0]) {
 				Add-Content -Path $BitcoinConfigFolder\bitcoin.conf -Value $Line -NoNewline
 			}
@@ -112,18 +115,22 @@ Try {
 				Add-Content -Path $BitcoinConfigFolder\bitcoin.conf -Value (([System.Environment]::NewLine)+$Line) -NoNewline
 			}
 		}
+		#Adding firewall rules
 		New-NetFirewallRule -DisplayName "Bitcoin Core" -Description "Bitcoin Core" -Enabled True -Profile Any -Direction Inbound -Protocol TCP -Program 'C:\Program Files\Bitcoin\bitcoin-qt.exe'
 		New-NetFirewallRule -DisplayName "Bitcoin Core" -Description "Bitcoin Core" -Enabled True -Profile Any -Direction Inbound -Protocol UDP -Program 'C:\Program Files\Bitcoin\bitcoin-qt.exe'
 
 		
 		Show-InstallationProgress "Installing Eclair 0.2 Beta 2"
+		#Installing silently
 		Execute-Process -Path $EclairInstaller -Parameters '/VERYSILENT /NORESTART'
 		$EclairConfigFolder = "$env:USERPROFILE\.eclair"
 		if(!(Test-Path $EclairConfigFolder)) {
+			#Creating the folder if it does not exist
 			New-Item -Path $EclairConfigFolder -ItemType Directory -Force
 		}
 		$EclairConfig = @("eclair.chain=mainnet","eclair.bitcoind.rpcport=8332","eclair.bitcoind.rpcuser=$RPCUser","eclair.bitcoind.rpcpassword=$RPCPassword")
 		foreach ($Line in $EclairConfig) {
+			#Looping through the config properties and writing to config file, using ::Newline and -NoNewline because powershell weirdness. 
 			if($Line -eq $EclairConfig[0]) {
 				Add-Content -Path $EclairConfigFolder\eclair.conf -Value $Line -NoNewline
 			}
@@ -131,10 +138,12 @@ Try {
 				Add-Content -Path $EclairConfigFolder\eclair.conf -Value (([System.Environment]::NewLine)+$Line) -NoNewline
 			}
 		}
+		#Adding firewall rules
 		New-NetFirewallRule -DisplayName "Eclair" -Description "Eclair" -Enabled True -Profile Any -Direction Inbound -Protocol TCP -Program "$env:USERPROFILE\Eclair\Eclair.exe"
 		New-NetFirewallRule -DisplayName "Eclair" -Description "Eclair" -Enabled True -Profile Any -Direction Inbound -Protocol UDP -Program "$env:USERPROFILE\Eclair\Eclair.exe"
 
 		Show-InstallationPrompt -Title 'Bitcoin Core needs to sync' -Message 'Bitcoin Core needs to sync, this might take days... When this is done, you may open Eclair. In the meantime, forward port 9735 in your router to this computer.' -ButtonMiddleText "OK"
+		#Starting Bitcoin Core without admin rights, even though this script is run as admin.
 		Execute-ProcessAsUser -Path "$env:ProgramFiles\Bitcoin\bitcoin-qt.exe" -RunLevel LeastPrivilege
 
 		##*===============================================
