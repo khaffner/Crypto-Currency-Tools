@@ -107,21 +107,39 @@ Try {
 		$EclairInstaller = "$env:TEMP\Eclair.exe"
 		Invoke-WebRequest -Uri 'https://github.com/ACINQ/eclair/releases/download/v0.2-beta2/Eclair-0.2-beta2.exe' -OutFile $EclairInstaller
 
+		
 		Show-InstallationProgress "Installing Bitcoin Core 0.16"
 		Execute-Process -Path $BitcoinCoreInstaller -Parameters '/S'
 		$BitcoinConfigFolder = "$env:APPDATA\Bitcoin"
 		if(!(Test-Path $BitcoinConfigFolder)) {
 			New-Item -Path $BitcoinConfigFolder -ItemType Directory -Force
 		}
-		Out-File $BitcoinConfigFolder\bitcoin.conf -InputObject ((Get-Content $PSScriptRoot\Files\bitcoin.conf).Replace("=rpcuser","=$RPCUser").Replace("=rpcpassword","=$RPCPassword")).TrimEnd()
+		$BitcoinConfig = @("testnet=0","server=1","rpcuser=$RPCUser","rpcpassword=$RPCPassword","txindex=1","zmqpubrawblock=tcp://127.0.0.1:29000","zmqpubrawtx=tcp://127.0.0.1:29000","addresstype=p2sh-segwit")
+		foreach ($Line in $BitcoinConfig) {
+			if($Line -eq $Config[0]) {
+				Add-Content -Path $BitcoinConfigFolder\bitcoin.conf -Value $Line -NoNewline
+			}
+			else {
+				Add-Content -Path $BitcoinConfigFolder\bitcoin.conf -Value (([System.Environment]::NewLine)+$Line) -NoNewline
+			}
+		}
 
+		
 		Show-InstallationProgress "Installing Eclair 0.2 Beta 2"
 		Execute-Process -Path $EclairInstaller -Parameters '/VERYSILENT /NORESTART'
 		$EclairConfigFolder = "$env:USERPROFILE\.eclair"
 		if(!(Test-Path $EclairConfigFolder)) {
 			New-Item -Path $EclairConfigFolder -ItemType Directory -Force
 		}
-		Out-File $EclairConfigFolder\eclair.conf -InputObject ((Get-Content $PSScriptRoot\Files\eclair.conf).Replace("=rpcuser","=$RPCUser").Replace("=rpcpassword","=$RPCPassword")).TrimEnd()
+		$EclairConfig = @("eclair.chain=mainnet","eclair.bitcoind.rpcport=8332","eclair.bitcoind.rpcuser=$RPCUser","eclair.bitcoind.rpcpassword=$RPCPassword")
+		foreach ($Line in $EclairConfig) {
+			if($Line -eq $Config[0]) {
+				Add-Content -Path $EclairConfigFolder\eclair.conf -Value $Line -NoNewline
+			}
+			else {
+				Add-Content -Path $EclairConfigFolder\eclair.conf -Value (([System.Environment]::NewLine)+$Line) -NoNewline
+			}
+		}
 
 		Show-InstallationPrompt -Title 'Bitcoin Core needs to sync' -Message 'Bitcoin Core needs to sync, this might take days... When this is done, you may open Eclair.' -ButtonMiddleText "OK"
 		Execute-ProcessAsUser -Path "$env:ProgramFiles\Bitcoin\bitcoin-qt.exe" -RunLevel LeastPrivilege
