@@ -105,7 +105,7 @@ Try {
 		}
 		$BitcoinConfig = @("testnet=0","server=1","rpcuser=$RPCUser","rpcpassword=$RPCPassword","txindex=1","zmqpubrawblock=tcp://127.0.0.1:29000","zmqpubrawtx=tcp://127.0.0.1:29000","addresstype=p2sh-segwit")
 		foreach ($Line in $BitcoinConfig) {
-			if($Line -eq $Config[0]) {
+			if($Line -eq $BitcoinConfig[0]) {
 				Add-Content -Path $BitcoinConfigFolder\bitcoin.conf -Value $Line -NoNewline
 			}
 			else {
@@ -122,7 +122,7 @@ Try {
 		}
 		$EclairConfig = @("eclair.chain=mainnet","eclair.bitcoind.rpcport=8332","eclair.bitcoind.rpcuser=$RPCUser","eclair.bitcoind.rpcpassword=$RPCPassword")
 		foreach ($Line in $EclairConfig) {
-			if($Line -eq $Config[0]) {
+			if($Line -eq $EclairConfig[0]) {
 				Add-Content -Path $EclairConfigFolder\eclair.conf -Value $Line -NoNewline
 			}
 			else {
