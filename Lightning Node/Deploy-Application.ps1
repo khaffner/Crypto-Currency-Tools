@@ -140,8 +140,7 @@ Try {
 				Add-Content -Path $EclairConfigFolder\eclair.conf -Value (([System.Environment]::NewLine)+$Line) -NoNewline
 			}
 		}
-
-		Show-InstallationPrompt -Title 'Bitcoin Core needs to sync' -Message 'Bitcoin Core needs to sync, this might take days... When this is done, you may open Eclair.' -ButtonMiddleText "OK"
+		Show-InstallationPrompt -Title 'Bitcoin Core needs to sync' -Message 'Bitcoin Core needs to sync, this might take days... When this is done, you may open Eclair. In the meantime, forward port 9735 in your router to this computer.' -ButtonMiddleText "OK"
 		Execute-ProcessAsUser -Path "$env:ProgramFiles\Bitcoin\bitcoin-qt.exe" -RunLevel LeastPrivilege
 
 		##*===============================================
@@ -150,11 +149,6 @@ Try {
 		[string]$installPhase = 'Post-Installation'
 		
 		## <Perform Post-Installation tasks here>
-		$ExtIP = Invoke-RestMethod "api.ipify.org"
-		$ConnectionResult = Test-NetConnection -ComputerName $ExtIP -Port 9735
-		if(!($ConnectionResult.TcpTestSucceeded)) {
-			Show-InstallationPrompt -Message "Port 9735 on this computer is not accessible from the Internet. You'll need to configure this in your router and/or firewall." -ButtonMiddleText 'OK'
-		}
 		
 		## Display a message at the end of the install
 		If (-not $useDefaultMsi) { Show-InstallationPrompt -Message 'Done!' -ButtonRightText 'OK' -Icon Information -NoWait }
