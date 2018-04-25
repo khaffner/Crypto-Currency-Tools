@@ -139,8 +139,8 @@ Try {
 			}
 		}
 		#Adding firewall rules
-		New-NetFirewallRule -DisplayName "Eclair" -Description "Eclair" -Enabled True -Profile Any -Direction Inbound -Protocol TCP -Program "$env:USERPROFILE\Eclair\Eclair.exe"
-		New-NetFirewallRule -DisplayName "Eclair" -Description "Eclair" -Enabled True -Profile Any -Direction Inbound -Protocol UDP -Program "$env:USERPROFILE\Eclair\Eclair.exe"
+		New-NetFirewallRule -DisplayName "Eclair" -Description "Eclair" -Enabled True -Profile Any -Direction Inbound -Protocol TCP -Program "$env:LOCALAPPDATA\Eclair\Eclair.exe"
+		New-NetFirewallRule -DisplayName "Eclair" -Description "Eclair" -Enabled True -Profile Any -Direction Inbound -Protocol UDP -Program "$env:LOCALAPPDATA\Eclair\Eclair.exe"
 
 		Show-InstallationPrompt -Title 'Bitcoin Core needs to sync' -Message 'Bitcoin Core needs to sync, this might take days... When this is done, you may open Eclair. In the meantime, forward port 9735 in your router to this computer.' -ButtonMiddleText "OK"
 		#Starting Bitcoin Core without admin rights, even though this script is run as admin.
